@@ -30,63 +30,6 @@ const readProfile = async (req, res) => {
   }
 };
 
-
-/* const updateProfile = async (req, res) => {
-  try {
-    const { email, phone, username, password, confirmPassword } = req.body;
-    const id = req.params.id;
-
-    if (password !== confirmPassword) {
-      return res.status(403).json({ message: "Passwords do not match" });
-    }
-
-    const existingEmail = await db.query(
-      "SELECT * FROM profile WHERE email = LOWER(?) AND userId != ?",
-      [email.trim(), id]
-    );
-    
-    if (existingEmail && existingEmail[0].length > 0) {
-      return res.status(402).json({
-        message: "Email already exists",
-        status: res.statusCode,
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const query =
-      "UPDATE profile SET email = LOWER(?), phone = ?, username = ?, password = ? WHERE userId = ?";
-    await db.query(query, [email.trim(), phone, username, hashedPassword, id]);
-    res.status(200).json({
-      message: "updated profile success",
-      status: res.statusCode,
-    });
-  } catch (err) {
-    res.status(400).json({
-      message: "updated profile fail",
-      statusCode: res.status,
-      serverMessage: err,
-    });
-  }
-}; */
-
-/* const deleteProfile = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const query = "DELETE FROM profile WHERE userId = ?";
-    await db.query(query, [id]);
-    res.status(200).json({
-      message: "delete profile success",
-      status: res.statusCode,
-    });
-  } catch (err) {
-    res.status(400).json({
-      message: "delete profile fail",
-      statusCode: res.status,
-      serverMessage: err,
-    });
-  }
-}; */
-
 const login = async (req, res) => {
   try {
     const { email, username, phone, password } = req.body;
@@ -101,7 +44,7 @@ const login = async (req, res) => {
       queryParam = email.trim();
     } else if (username) {
       const trimmedUsername = username.trim();
-      userQuery = "username = ?";
+      userQuery = "username = LOWER(?)";
       queryParam = trimmedUsername.startsWith("@") ? trimmedUsername : `@${trimmedUsername}`;
     } else if (phone) {
       userQuery = "phone = ?";
@@ -151,11 +94,13 @@ const register = async (req, res) => {
     const trimmedConfirmPassword = confirmPassword.trim();
 
     const lowercaseEmail = trimmedEmail ? trimmedEmail.toLowerCase() : null;
+    const lowercaseUsername = trimmedUsername ? trimmedUsername.toLowerCase() : null;
+
 
     // Email regex pattern
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if ((!lowercaseEmail && !trimmedPhone) || !trimmedUsername || !trimmedPassword) {
+    if ((!lowercaseEmail && !trimmedPhone) || !lowercaseUsername || !trimmedPassword) {
       return res.status(401).json({
         message: "Please fill the data completely, either email or phone must be provided",
         status: res.statusCode,
@@ -169,8 +114,8 @@ const register = async (req, res) => {
       });
     }
 
-    if (!trimmedUsername.startsWith("@")) {
-      trimmedUsername = "@" + trimmedUsername;
+    if (!lowercaseUsername.startsWith("@")) {
+      lowercaseUsername = "@" + lowercaseUsername;
     }
 
     if (lowercaseEmail) {
@@ -203,7 +148,7 @@ const register = async (req, res) => {
 
     const existingUsername = await db.query(
       "SELECT * FROM profile WHERE username = ?",
-      [trimmedUsername]
+      [lowercaseUsername]
     );
 
     if (existingUsername && existingUsername[0].length > 0) {
@@ -220,7 +165,7 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
     const [result] = await db.execute(
       "INSERT INTO profile (email, phone, username, password) VALUES (?, ?, ?, ?)",
-      [lowercaseEmail ? lowercaseEmail : null, trimmedPhone || null, trimmedUsername, hashedPassword]
+      [lowercaseEmail ? lowercaseEmail : null, trimmedPhone || null, lowercaseUsername, hashedPassword]
     );
 
     res.status(201).json({
