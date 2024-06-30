@@ -2,6 +2,7 @@ const db = require("../database/database.connection");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
+//http://localhost:3031/profile/:id
 const readProfile = async (req, res) => {
   try {
     const id = req.params.id;
@@ -30,27 +31,25 @@ const readProfile = async (req, res) => {
   }
 };
 
+//http://localhost:3031/profile/login
 const login = async (req, res) => {
   try {
-    const { email, username, phone, password } = req.body;
+    const { identifier, password } = req.body;
 
     const trimmedPassword = password.trim();
 
     let userQuery = "";
     let queryParam = "";
 
-    if (email) {
+    if (identifier.includes('@')) {
+      // Assuming it's an email
       userQuery = "email = LOWER(?)";
-      queryParam = email.trim();
-    } else if (username) {
-      const trimmedUsername = username.trim();
+      queryParam = identifier.trim().toLowerCase();
+    } else {
+      // Assuming it's a username
+      const trimmedUsername = identifier.trim().toLowerCase();
       userQuery = "username = LOWER(?)";
       queryParam = trimmedUsername.startsWith("@") ? trimmedUsername : `@${trimmedUsername}`;
-    } else if (phone) {
-      userQuery = "phone = ?";
-      queryParam = phone.trim();
-    } else {
-      return res.status(400).json({ message: "Email, username, or phone must be provided" });
     }
 
     const [data] = await db.execute(
@@ -59,7 +58,7 @@ const login = async (req, res) => {
     );
 
     if (data.length === 0) {
-      return res.status(404).json({ message: `${email ? "Email" : username ? "Username" : "Phone number"} not found` });
+      return res.status(404).json({ message: `${identifier.includes('@') ? "Email" : "Username"} not found` });
     }
 
     const user = data[0];
@@ -70,13 +69,10 @@ const login = async (req, res) => {
 
     const token = jwt.sign(
       { id: user.userId, email: user.email },
-      "lalilulelo",
-      {
-        expiresIn: "5h",
-      }
+      "lalilulelo"
     );
 
-    res.status(200).json({ token, id: user.userId, username: user.username });
+    res.status(200).json({ token, id: user.userId, username: user.username, displayName: user.displayName });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -84,44 +80,40 @@ const login = async (req, res) => {
 };
 
 
+//http://localhost:3031/profile/register
 const register = async (req, res) => {
   try {
-    const { email, phone, username, password, confirmPassword } = req.body;
-    const trimmedEmail = email ? email.trim() : null;
-    const trimmedPhone = phone ? phone.trim() : null;
-    let trimmedUsername = username.trim();
+    const { email, username, displayName, password, confirmPassword } = req.body;
+    const trimmedEmail = email.trim().toLowerCase();
+    let trimmedUsername = username.trim().toLowerCase();
+    const trimmedDisplayName = displayName.trim()
     const trimmedPassword = password.trim();
     const trimmedConfirmPassword = confirmPassword.trim();
-
-    const lowercaseEmail = trimmedEmail ? trimmedEmail.toLowerCase() : null;
-    const lowercaseUsername = trimmedUsername ? trimmedUsername.toLowerCase() : null;
-
 
     // Email regex pattern
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if ((!lowercaseEmail && !trimmedPhone) || !lowercaseUsername || !trimmedPassword) {
+    if (!trimmedEmail || !trimmedUsername || !trimmedDisplayName || !trimmedPassword) {
       return res.status(401).json({
-        message: "Please fill the data completely, either email or phone must be provided",
+        message: "Please fill the data completely",
         status: res.statusCode,
       });
     }
 
-    if (lowercaseEmail && !emailRegex.test(lowercaseEmail)) {
+    if (trimmedEmail && !emailRegex.test(trimmedEmail)) {
       return res.status(400).json({
         message: "Invalid email format",
         status: res.statusCode,
       });
     }
 
-    if (!lowercaseUsername.startsWith("@")) {
-      lowercaseUsername = "@" + lowercaseUsername;
+    if (!trimmedUsername.startsWith("@")) {
+      trimmedUsername = "@" + trimmedUsername;
     }
 
-    if (lowercaseEmail) {
       const existingEmail = await db.query(
         "SELECT * FROM profile WHERE email = LOWER(?)",
-        [lowercaseEmail]
+        [trimmedEmail]
       );
 
       if (existingEmail && existingEmail[0].length > 0) {
@@ -130,25 +122,10 @@ const register = async (req, res) => {
           status: res.statusCode,
         });
       }
-    }
-
-    if (trimmedPhone) {
-      const existingPhone = await db.query(
-        "SELECT * FROM profile WHERE phone = ?",
-        [trimmedPhone]
-      );
-
-      if (existingPhone && existingPhone[0].length > 0) {
-        return res.status(402).json({
-          message: "Phone number already exists",
-          status: res.statusCode,
-        });
-      }
-    }
 
     const existingUsername = await db.query(
       "SELECT * FROM profile WHERE username = ?",
-      [lowercaseUsername]
+      [trimmedUsername]
     );
 
     if (existingUsername && existingUsername[0].length > 0) {
@@ -164,8 +141,8 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
     const [result] = await db.execute(
-      "INSERT INTO profile (email, phone, username, password) VALUES (?, ?, ?, ?)",
-      [lowercaseEmail ? lowercaseEmail : null, trimmedPhone || null, lowercaseUsername, hashedPassword]
+      "INSERT INTO profile (email, username, displayName, password) VALUES ( ?, ?, ?, ?)",
+      [trimmedEmail, trimmedUsername, trimmedDisplayName, hashedPassword]
     );
 
     res.status(201).json({
