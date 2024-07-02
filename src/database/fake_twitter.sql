@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 02, 2024 at 11:01 AM
+-- Generation Time: Jul 02, 2024 at 08:42 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -59,6 +59,50 @@ INSERT INTO `comments` (`comment_id`, `twtId`, `username`, `displayName`, `comme
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `isbookmarked`
+--
+
+CREATE TABLE `isbookmarked` (
+  `bookmark_id` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
+  `twtId` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `isliked`
+--
+
+CREATE TABLE `isliked` (
+  `like_id` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
+  `twtId` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `isliked`
+--
+
+INSERT INTO `isliked` (`like_id`, `userId`, `twtId`) VALUES
+(1, 111, 201),
+(2, 111, 208);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `isretweeted`
+--
+
+CREATE TABLE `isretweeted` (
+  `retweet_id` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
+  `twtId` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `profile`
 --
 
@@ -84,7 +128,8 @@ INSERT INTO `profile` (`userId`, `username`, `displayName`, `email`, `password`)
 (108, '@thebraveknight', 'Lil Gator', '', 'ncxbvjsdhfahi'),
 (109, '@judgementkazzy', 'Uncle Kaz', '', 'tigerdrop'),
 (110, '@thechosenundead', 'Local Knight', '', 'eeeehhhhhhhhhhhh'),
-(111, '@dungeondwelver', 'Senshi', '', 'sddjvkuygsfjdsbfjkeysgfd');
+(111, '@dungeondwelver', 'Senshi', '', 'sddjvkuygsfjdsbfjkeysgfd'),
+(124, '@q', 'q', 'q@gmail.com', '$2b$10$cMmuLv8H8oefiz5OP.OoC.x546TR18YEk11Av3uN1LKBJj9ZkU5Ji');
 
 -- --------------------------------------------------------
 
@@ -97,7 +142,7 @@ CREATE TABLE `tweets` (
   `userId` int(11) NOT NULL,
   `tweet` text NOT NULL,
   `image` text DEFAULT NULL,
-  `timestamp` date NOT NULL DEFAULT current_timestamp(),
+  `timestamp` datetime NOT NULL DEFAULT current_timestamp(),
   `likes` int(11) NOT NULL DEFAULT 0,
   `retweets` int(11) NOT NULL DEFAULT 0,
   `qtweets` int(11) NOT NULL DEFAULT 0,
@@ -110,14 +155,15 @@ CREATE TABLE `tweets` (
 --
 
 INSERT INTO `tweets` (`twtId`, `userId`, `tweet`, `image`, `timestamp`, `likes`, `retweets`, `qtweets`, `views`, `bookmarks`) VALUES
-(201, 103, 'AAARGH THEY JUST HUNTED MY FAMILY', 'https://i.imgur.com/8iFdqrC.jpeg', '2024-06-29', 100, 50, 25, 1999, 4),
-(202, 104, 'Can\'t believe the last batch of new recruits fell into a deep pit', NULL, '2024-06-01', 32, 5, 1, 90, 0),
-(203, 105, 'They got Jacob!', 'https://i.imgur.com/Lao46Bc.png', '2024-05-21', 50000, 23300, 5453, 5663422, 12938),
-(204, 107, 'I look sooo good 💅💅💅', 'https://i.imgur.com/2fphDuZ.png', '2024-04-30', 375, 123, 54, 6432, 3),
-(205, 108, 'Took me an hour to climb up here', 'https://i.imgur.com/g6svT2d.png', '2024-04-17', 2, 1, 0, 5, 1),
-(206, 109, 'What have I run into this time...', 'https://i.imgur.com/S1MzYm4.png', '2024-04-09', 45, 3, 0, 300, 19),
-(207, 110, '...', NULL, '2024-02-21', 3216, 453, 231, 67329, 324),
-(208, 111, 'Cooked a good bunch of treasure bugs', 'https://i.imgur.com/B4sKzKk.jpeg', '2024-02-01', 5, 3, 1, 12, 2);
+(201, 103, 'AAARGH THEY JUST HUNTED MY FAMILY', 'https://i.imgur.com/8iFdqrC.jpeg', '2024-06-29 00:00:00', 100, 50, 25, 1999, 4),
+(202, 104, 'Can\'t believe the last batch of new recruits fell into a deep pit', NULL, '2024-06-01 00:00:00', 32, 5, 1, 90, 0),
+(203, 105, 'They got Jacob!', 'https://i.imgur.com/Lao46Bc.png', '2024-05-21 00:00:00', 50000, 23300, 5453, 5663422, 12938),
+(204, 107, 'I look sooo good 💅💅💅', 'https://i.imgur.com/2fphDuZ.png', '2024-04-30 00:00:00', 375, 123, 54, 6432, 3),
+(205, 108, 'Took me an hour to climb up here', 'https://i.imgur.com/g6svT2d.png', '2024-04-17 00:00:00', 2, 1, 0, 5, 1),
+(206, 109, 'What have I run into this time...', 'https://i.imgur.com/S1MzYm4.png', '2024-04-09 00:00:00', 45, 3, 0, 300, 19),
+(207, 110, '...', NULL, '2024-02-21 00:00:00', 3216, 453, 231, 67329, 324),
+(208, 111, 'Cooked a good bunch of treasure bugs', 'https://i.imgur.com/B4sKzKk.jpeg', '2024-02-01 00:00:00', 5, 3, 1, 12, 2),
+(209, 107, 'test tweet', NULL, '2024-07-02 00:00:00', 0, 0, 0, 0, 0);
 
 --
 -- Indexes for dumped tables
@@ -129,6 +175,30 @@ INSERT INTO `tweets` (`twtId`, `userId`, `tweet`, `image`, `timestamp`, `likes`,
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`comment_id`),
   ADD KEY `twtId` (`twtId`);
+
+--
+-- Indexes for table `isbookmarked`
+--
+ALTER TABLE `isbookmarked`
+  ADD PRIMARY KEY (`bookmark_id`),
+  ADD UNIQUE KEY `unique_bookmark` (`userId`,`twtId`),
+  ADD KEY `fk_bookmark_tweet` (`twtId`);
+
+--
+-- Indexes for table `isliked`
+--
+ALTER TABLE `isliked`
+  ADD PRIMARY KEY (`like_id`),
+  ADD UNIQUE KEY `unique_like` (`userId`,`twtId`),
+  ADD KEY `fk_like_tweet` (`twtId`);
+
+--
+-- Indexes for table `isretweeted`
+--
+ALTER TABLE `isretweeted`
+  ADD PRIMARY KEY (`retweet_id`),
+  ADD UNIQUE KEY `unique_retweet` (`userId`,`twtId`),
+  ADD KEY `fk_retweet_tweet` (`twtId`);
 
 --
 -- Indexes for table `profile`
@@ -154,16 +224,34 @@ ALTER TABLE `comments`
   MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=316;
 
 --
+-- AUTO_INCREMENT for table `isbookmarked`
+--
+ALTER TABLE `isbookmarked`
+  MODIFY `bookmark_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `isliked`
+--
+ALTER TABLE `isliked`
+  MODIFY `like_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `isretweeted`
+--
+ALTER TABLE `isretweeted`
+  MODIFY `retweet_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `profile`
 --
 ALTER TABLE `profile`
-  MODIFY `userId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
+  MODIFY `userId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=125;
 
 --
 -- AUTO_INCREMENT for table `tweets`
 --
 ALTER TABLE `tweets`
-  MODIFY `twtId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=209;
+  MODIFY `twtId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=211;
 
 --
 -- Constraints for dumped tables
@@ -174,6 +262,27 @@ ALTER TABLE `tweets`
 --
 ALTER TABLE `comments`
   ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`twtId`) REFERENCES `tweets` (`twtId`);
+
+--
+-- Constraints for table `isbookmarked`
+--
+ALTER TABLE `isbookmarked`
+  ADD CONSTRAINT `fk_bookmark_tweet` FOREIGN KEY (`twtId`) REFERENCES `tweets` (`twtId`),
+  ADD CONSTRAINT `fk_bookmark_user` FOREIGN KEY (`userId`) REFERENCES `profile` (`userId`);
+
+--
+-- Constraints for table `isliked`
+--
+ALTER TABLE `isliked`
+  ADD CONSTRAINT `fk_like_tweet` FOREIGN KEY (`twtId`) REFERENCES `tweets` (`twtId`),
+  ADD CONSTRAINT `fk_like_user` FOREIGN KEY (`userId`) REFERENCES `profile` (`userId`);
+
+--
+-- Constraints for table `isretweeted`
+--
+ALTER TABLE `isretweeted`
+  ADD CONSTRAINT `fk_retweet_tweet` FOREIGN KEY (`twtId`) REFERENCES `tweets` (`twtId`),
+  ADD CONSTRAINT `fk_retweet_user` FOREIGN KEY (`userId`) REFERENCES `profile` (`userId`);
 
 --
 -- Constraints for table `tweets`
