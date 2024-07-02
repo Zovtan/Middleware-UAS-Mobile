@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 29, 2024 at 12:26 PM
+-- Generation Time: Jul 02, 2024 at 11:01 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -66,8 +66,7 @@ CREATE TABLE `profile` (
   `userId` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `displayName` varchar(50) NOT NULL,
-  `email` varchar(50) DEFAULT NULL,
-  `phone` varchar(50) DEFAULT NULL,
+  `email` varchar(50) NOT NULL,
   `password` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -75,17 +74,17 @@ CREATE TABLE `profile` (
 -- Dumping data for table `profile`
 --
 
-INSERT INTO `profile` (`userId`, `username`, `displayName`, `email`, `phone`, `password`) VALUES
-(101, '@test', 'tester', 'test@gmail.com', '12345', 'test'),
-(102, '@gorlockthebambino', 'Bambino', '', '99999', '99999'),
-(103, '@shampoo', 'John Shamos', NULL, '9807965', '1231265434354'),
-(104, '@thebestemployee', 'Mission Control', 'thebestemployee@drg.com', NULL, 'rockandstone'),
-(105, '@trendieteen', 'Peter', NULL, NULL, 'fsdhtyjhg'),
-(107, '@wanderingmonk', 'Mikudrin', NULL, NULL, 'dlfskdm ejwjeiw'),
-(108, '@thebraveknight', 'Lil Gator', NULL, NULL, 'ncxbvjsdhfahi'),
-(109, '@judgementkazzy', 'Uncle Kaz', NULL, NULL, 'tigerdrop'),
-(110, '@thechosenundead', 'Local Knight', NULL, NULL, 'eeeehhhhhhhhhhhh'),
-(111, '@dungeondwelver', 'Senshi', NULL, NULL, 'sddjvkuygsfjdsbfjkeysgfd');
+INSERT INTO `profile` (`userId`, `username`, `displayName`, `email`, `password`) VALUES
+(101, '@test', 'tester', 'test@gmail.com', 'test'),
+(102, '@gorlockthebambino', 'Bambino', '', '99999'),
+(103, '@shampoo', 'John Shamos', '', '1231265434354'),
+(104, '@thebestemployee', 'Mission Control', 'thebestemployee@drg.com', 'rockandstone'),
+(105, '@trendieteen', 'Peter', '', 'fsdhtyjhg'),
+(107, '@wanderingmonk', 'Mikudrin', '', 'dlfskdm ejwjeiw'),
+(108, '@thebraveknight', 'Lil Gator', '', 'ncxbvjsdhfahi'),
+(109, '@judgementkazzy', 'Uncle Kaz', '', 'tigerdrop'),
+(110, '@thechosenundead', 'Local Knight', '', 'eeeehhhhhhhhhhhh'),
+(111, '@dungeondwelver', 'Senshi', '', 'sddjvkuygsfjdsbfjkeysgfd');
 
 -- --------------------------------------------------------
 
@@ -158,7 +157,7 @@ ALTER TABLE `comments`
 -- AUTO_INCREMENT for table `profile`
 --
 ALTER TABLE `profile`
-  MODIFY `userId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
+  MODIFY `userId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
 
 --
 -- AUTO_INCREMENT for table `tweets`
