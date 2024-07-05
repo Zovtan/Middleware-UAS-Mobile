@@ -3,18 +3,31 @@ const db = require("../database/database.connection");
 //http://localhost:3031/tweets/
 const readTweets = async (req, res) => {
   try {
+    const userId = req.params.userId; // Assuming userId is available in the request
     const query = `
-      SELECT tweets.*, profile.username, profile.displayName, COUNT(comments.comment_id) AS commentCount
+      SELECT tweets.*, profile.username, profile.displayName, COUNT(comments.commentId) AS commentCount
       FROM tweets
       LEFT JOIN comments ON tweets.twtId = comments.twtId
       LEFT JOIN profile ON tweets.userId = profile.userId
       GROUP BY tweets.twtId;
     `;
     const [data] = await db.query(query);
+
+    // Retrieve interactions for each tweet
+    const tweetsWithInteractions = await Promise.all(
+      data.map(async (tweet) => {
+        const interactions = await checkUserInteractions(userId, tweet.twtId);
+        return {
+          ...tweet,
+          interactions,
+        };
+      })
+    );
+
     res.status(200).json({
       message: "get all tweets success",
       status: res.statusCode,
-      tweets: data,
+      tweets: tweetsWithInteractions,
     });
   } catch (err) {
     console.log(err);
@@ -31,7 +44,7 @@ const readTweet = async (req, res) => {
   try {
     const id = req.params.id;
     const query = `
-      SELECT tweets.*, profile.username, profile.displayName, COUNT(comments.comment_id) AS commentCount
+      SELECT tweets.*, profile.username, profile.displayName, COUNT(comments.commentId) AS commentCount
       FROM tweets
       LEFT JOIN comments ON tweets.twtId = comments.twtId
       LEFT JOIN profile ON tweets.userId = profile.userId
@@ -334,6 +347,68 @@ const bookmarkTweet = async (req, res) => {
   }
 };
 
+// Helper function to check if user has liked, retweeted, or bookmarked a tweet
+const checkUserInteractions = async (userId, twtId) => {
+  try {
+    // Check if user has liked the tweet
+    const checkLikeQuery = `
+      SELECT * FROM isliked
+      WHERE userId = ? AND twtId = ?;
+    `;
+    const [liked] = await db.query(checkLikeQuery, [userId, twtId]);
+    const userLiked = liked.length > 0;
+
+    // Check if user has retweeted the tweet
+    const checkRetweetQuery = `
+      SELECT * FROM isretweeted
+      WHERE userId = ? AND twtId = ?;
+    `;
+    const [retweeted] = await db.query(checkRetweetQuery, [userId, twtId]);
+    const userRetweeted = retweeted.length > 0;
+
+    // Check if user has bookmarked the tweet
+    const checkBookmarkQuery = `
+      SELECT * FROM isbookmarked
+      WHERE userId = ? AND twtId = ?;
+    `;
+    const [bookmarked] = await db.query(checkBookmarkQuery, [userId, twtId]);
+    const userBookmarked = bookmarked.length > 0;
+
+    return {
+      isLiked: userLiked,
+      isRetweeted: userRetweeted,
+      isBookmarked: userBookmarked,
+    };
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+};
+
+// http://localhost:3031/tweets/interactions/:id
+const getTweetInteractions = async (req, res) => {
+  try {
+    const userId = req.body.userId; // Assuming userId is available in the request
+    const twtId = req.params.id; // Assuming twtId is passed as a route parameter
+
+    // Call the helper function to get user interactions
+    const interactions = await checkUserInteractions(userId, twtId);
+
+    res.status(200).json({
+      message: "User interactions retrieved successfully",
+      status: res.statusCode,
+      interactions,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({
+      message: "Failed to retrieve user interactions",
+      statusCode: res.status,
+      serverMessage: err,
+    });
+  }
+};
+
 module.exports = {
   readTweet,
   readTweets,
@@ -344,4 +419,5 @@ module.exports = {
   likeTweet,
   retweetTweet,
   bookmarkTweet,
+  getTweetInteractions
 };
