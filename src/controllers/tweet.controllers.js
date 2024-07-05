@@ -91,10 +91,10 @@ const getCommentsByTweetId = async (req, res) => {
   }
 };
 
-//http://localhost:3031/tweets/post
+//http://localhost:3031/tweets/
 const createTweet = async (req, res) => {
   try {
-    const { userId, tweet, image } = req.body;
+    const {userId, tweet} = req.body;
     const query = `
       INSERT INTO tweets (userId, tweet, timestamp, likes, retweets, qtweets, views, bookmarks)
       VALUES (?, ?, CURRENT_TIMESTAMP, 0, 0, 0, 0, 0);
@@ -256,6 +256,14 @@ const retweetTweet = async (req, res) => {
       `;
       await db.query(unretweetQuery, [userId, twtId]);
 
+      // Decrease retweet count in tweets table
+      const decreaseRetweetQuery = `
+        UPDATE tweets
+        SET retweets = retweets - 1
+        WHERE twtId = ?;
+      `;
+      await db.query(decreaseRetweetQuery, [twtId]);
+
       res.status(200).json({
         message: "Tweet unretweeted successfully",
         status: res.statusCode,
@@ -312,6 +320,14 @@ const bookmarkTweet = async (req, res) => {
       `;
       await db.query(unbookmarkQuery, [userId, twtId]);
 
+      // Decrease bookmark count in tweets table
+      const decreaseBookmarkQuery = `
+        UPDATE tweets
+        SET bookmarks = bookmarks - 1
+        WHERE twtId = ?;
+      `;
+      await db.query(decreaseBookmarkQuery, [twtId]);
+
       res.status(200).json({
         message: "Tweet bookmark removed successfully",
         status: res.statusCode,
@@ -346,6 +362,7 @@ const bookmarkTweet = async (req, res) => {
     });
   }
 };
+
 
 // Helper function to check if user has liked, retweeted, or bookmarked a tweet
 const checkUserInteractions = async (userId, twtId) => {
