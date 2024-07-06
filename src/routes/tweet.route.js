@@ -4,7 +4,6 @@ const routes = express.Router();
 const tweetControllers = require("../controllers/tweet.controllers");
 
 routes.get("/:userId", tweetControllers.readTweets);
-routes.get("/:id", tweetControllers.readTweet);
 routes.get("/comments/:id", tweetControllers.getCommentsByTweetId);
 routes.get('/interactions/:id', tweetControllers.getTweetInteractions);
 routes.post('/', tweetControllers.createTweet);

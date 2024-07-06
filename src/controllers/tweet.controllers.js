@@ -9,7 +9,7 @@ const readTweets = async (req, res) => {
       FROM tweets
       LEFT JOIN comments ON tweets.twtId = comments.twtId
       LEFT JOIN profile ON tweets.userId = profile.userId
-      GROUP BY tweets.twtId;
+      GROUP BY tweets.timestamp DESC;
     `;
     const [data] = await db.query(query);
 
@@ -33,34 +33,6 @@ const readTweets = async (req, res) => {
     console.log(err);
     res.status(400).json({
       message: "get all tweets fail",
-      statusCode: res.status,
-      serverMessage: err,
-    });
-  }
-};
-
-//http://localhost:3031/tweets/:id
-const readTweet = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const query = `
-      SELECT tweets.*, profile.username, profile.displayName, COUNT(comments.commentId) AS commentCount
-      FROM tweets
-      LEFT JOIN comments ON tweets.twtId = comments.twtId
-      LEFT JOIN profile ON tweets.userId = profile.userId
-      WHERE tweets.twtId = ?
-      GROUP BY tweets.twtId;
-    `;
-    const [data] = await db.query(query, [id]);
-    res.status(200).json({
-      message: "get tweet success",
-      status: res.statusCode,
-      tweet: data[0],
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(400).json({
-      message: "get tweet fail",
       statusCode: res.status,
       serverMessage: err,
     });
@@ -118,35 +90,54 @@ const createTweet = async (req, res) => {
 const updateTweet = async (req, res) => {
   try {
     const id = req.params.id;
-    const { tweet } = req.body;
+    const { tweet, userId } = req.body; // Assuming userId is passed in the body
 
-    if (!tweet) {
+    if (!tweet || !userId) {
       return res.status(400).json({
-        message: "No tweet content provided to update",
+        message: "Tweet content or userId not provided",
         statusCode: res.statusCode,
       });
     }
 
-    const query = `
-      UPDATE tweets
-      SET tweet = ?
-      WHERE twtId = ?;
-    `;
-    await db.query(query, [tweet, id]);
+    // Fetch the tweet from the database to check userId
+    const fetchQuery = 'SELECT userId FROM tweets WHERE twtId = ?';
+    const [rows] = await db.query(fetchQuery, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "Tweet not found",
+        statusCode: res.statusCode,
+      });
+    }
+
+    const tweetUserId = rows[0].userId;
+
+    // Check if the userId from the body matches the tweet's userId
+    if (userId !== tweetUserId) {
+      return res.status(403).json({
+        message: "Unauthorized to update this tweet",
+        statusCode: res.statusCode,
+      });
+    }
+
+    // Update the tweet
+    const updateQuery = 'UPDATE tweets SET tweet = ? WHERE twtId = ?';
+    await db.query(updateQuery, [tweet, id]);
 
     res.status(200).json({
       message: "Tweet updated successfully",
       status: res.statusCode,
     });
   } catch (err) {
-    console.log(err);
-    res.status(400).json({
+    console.error(err);
+    res.status(500).json({
       message: "Failed to update tweet",
-      statusCode: res.status,
-      serverMessage: err,
+      statusCode: res.statusCode,
+      serverMessage: err.message,
     });
   }
 };
+
 
 //http://localhost:3031/tweets/:id
 const deleteTweet = async (req, res) => {
@@ -427,7 +418,6 @@ const getTweetInteractions = async (req, res) => {
 };
 
 module.exports = {
-  readTweet,
   readTweets,
   getCommentsByTweetId,
   createTweet,
