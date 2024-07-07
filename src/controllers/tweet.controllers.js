@@ -92,13 +92,6 @@ const updateTweet = async (req, res) => {
     const id = req.params.id;
     const { tweet, userId } = req.body; // Assuming userId is passed in the body
 
-    if (!tweet || !userId) {
-      return res.status(400).json({
-        message: "Tweet content or userId not provided",
-        statusCode: res.statusCode,
-      });
-    }
-
     // Fetch the tweet from the database to check userId
     const fetchQuery = 'SELECT userId FROM tweets WHERE twtId = ?';
     const [rows] = await db.query(fetchQuery, [id]);
@@ -141,13 +134,64 @@ const updateTweet = async (req, res) => {
 
 //http://localhost:3031/tweets/:id
 const deleteTweet = async (req, res) => {
+  const id = req.params.id;
+  const userId = req.body.userId; // Assuming userId is sent in the request body
+
+  const getUserIdQuery = `
+    SELECT userId FROM tweets
+    WHERE twtId = ?;
+  `;
+
+  const deleteLikesQuery = `
+    DELETE FROM isliked
+    WHERE twtId = ?;
+  `;
+  const deleteBookmarksQuery = `
+    DELETE FROM isbookmarked
+    WHERE twtId = ?;
+  `;
+  const deleteRetweetsQuery = `
+    DELETE FROM isretweeted
+    WHERE twtId = ?;
+  `;
+  const deleteCommentsQuery = `
+    DELETE FROM comments
+    WHERE twtId = ?;
+  `;
+  const deleteTweetQuery = `
+    DELETE FROM tweets
+    WHERE twtId = ?;
+  `;
+  
   try {
-    const id = req.params.id;
-    const query = `
-      DELETE FROM tweets
-      WHERE twtId = ?;
-    `;
-    await db.query(query, [id]);
+    // Get the userId associated with the tweet
+    const [rows] = await db.query(getUserIdQuery, [id]);
+    if (rows.length === 0) {
+      return res.status(404).json({
+        message: "Tweet not found",
+        statusCode: 404,
+      });
+    }
+
+    const tweetUserId = rows[0].userId;
+    if (tweetUserId !== userId) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this tweet",
+        statusCode: 403,
+      });
+    }
+
+    // Delete related likes
+    await db.query(deleteLikesQuery, [id]);
+    // Delete related bookmarks
+    await db.query(deleteBookmarksQuery, [id]);
+    // Delete related retweets
+    await db.query(deleteRetweetsQuery, [id]);
+    // Delete related comments
+    await db.query(deleteCommentsQuery, [id]);
+    // Delete the tweet
+    await db.query(deleteTweetQuery, [id]);
+
     res.status(200).json({
       message: "Tweet deleted successfully",
       status: res.statusCode,
@@ -161,6 +205,8 @@ const deleteTweet = async (req, res) => {
     });
   }
 };
+
+
 
 // http://localhost:3031/tweets/like/:id
 const likeTweet = async (req, res) => {
