@@ -2,35 +2,6 @@ const db = require("../database/database.connection");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-//http://localhost:3031/profile/:id
-const readProfile = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const query = "SELECT * FROM profile WHERE userId = ?;";
-    const [data] = await db.query(query, [id]);
-
-    if (!data || data.length === 0) {
-      return res.status(404).json({
-        message: "Profile not found",
-        status: res.statusCode,
-      });
-    }
-
-    res.status(200).json({
-      message: "Get profile success",
-      status: res.statusCode,
-      profile: data[0], // Assuming userId is unique and only one profile is expected
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      message: "Get profile fail",
-      status: res.statusCode,
-      serverMessage: err.message,
-    });
-  }
-};
-
 //http://localhost:3031/profile/login
 const login = async (req, res) => {
   try {
@@ -42,11 +13,11 @@ const login = async (req, res) => {
     let queryParam = "";
 
     if (identifier.includes('@')) {
-      // Assuming it's an email
+      // Jika input email
       userQuery = "email = LOWER(?)";
       queryParam = identifier.trim().toLowerCase();
     } else {
-      // Assuming it's a username
+      // jika input username
       const trimmedUsername = identifier.trim().toLowerCase();
       userQuery = "username = LOWER(?)";
       queryParam = trimmedUsername.startsWith("@") ? trimmedUsername : `@${trimmedUsername}`;
@@ -67,12 +38,7 @@ const login = async (req, res) => {
       return res.status(401).json({ message: "Password doesn't match" });
     }
 
-    const token = jwt.sign(
-      { id: user.userId, email: user.email },
-      "lalilulelo"
-    );
-
-    res.status(200).json({ token, id: user.userId, username: user.username, displayName: user.displayName });
+    res.status(200).json({ id: user.userId, username: user.username, displayName: user.displayName });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -90,7 +56,7 @@ const register = async (req, res) => {
     const trimmedPassword = password.trim();
     const trimmedConfirmPassword = confirmPassword.trim();
 
-    // Email regex pattern
+    // regex email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!trimmedEmail || !trimmedUsername || !trimmedDisplayName || !trimmedPassword) {
@@ -117,7 +83,7 @@ const register = async (req, res) => {
       );
 
       if (existingEmail && existingEmail[0].length > 0) {
-        return res.status(402).json({
+        return res.status(401).json({
           message: "Email already exists",
           status: res.statusCode,
         });
@@ -139,6 +105,7 @@ const register = async (req, res) => {
       return res.status(403).json({ message: "Passwords do not match" });
     }
 
+    //hashing password
     const hashedPassword = await bcrypt.hash(trimmedPassword, 10);
     const [result] = await db.execute(
       "INSERT INTO profile (email, username, displayName, password) VALUES ( ?, ?, ?, ?)",
@@ -157,7 +124,6 @@ const register = async (req, res) => {
 
 
 module.exports = {
-  readProfile,
   login,
   register,
 };

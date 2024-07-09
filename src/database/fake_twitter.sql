@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 02, 2024 at 08:42 PM
+-- Generation Time: Jul 09, 2024 at 09:17 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `comments` (
-  `comment_id` int(11) NOT NULL,
+  `commentId` int(11) NOT NULL,
   `twtId` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `displayName` varchar(50) NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE `comments` (
 -- Dumping data for table `comments`
 --
 
-INSERT INTO `comments` (`comment_id`, `twtId`, `username`, `displayName`, `comment`) VALUES
+INSERT INTO `comments` (`commentId`, `twtId`, `username`, `displayName`, `comment`) VALUES
 (301, 201, '@pawlicko', 'Miustress Pricilla', 'Yer get what mew deservuurr'),
 (302, 201, '@fifthgenhunte', 'Matthew Hunter', 'Sorry for the collateral damage'),
 (303, 202, '@fromatodskippingbtoc', 'Scout', 'Maybe you should do your job better huh?'),
@@ -68,6 +68,13 @@ CREATE TABLE `isbookmarked` (
   `twtId` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `isbookmarked`
+--
+
+INSERT INTO `isbookmarked` (`bookmark_id`, `userId`, `twtId`) VALUES
+(6, 103, 201);
+
 -- --------------------------------------------------------
 
 --
@@ -85,6 +92,7 @@ CREATE TABLE `isliked` (
 --
 
 INSERT INTO `isliked` (`like_id`, `userId`, `twtId`) VALUES
+(7, 103, 201),
 (1, 111, 201),
 (2, 111, 208);
 
@@ -99,6 +107,13 @@ CREATE TABLE `isretweeted` (
   `userId` int(11) NOT NULL,
   `twtId` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `isretweeted`
+--
+
+INSERT INTO `isretweeted` (`retweet_id`, `userId`, `twtId`) VALUES
+(2, 111, 201);
 
 -- --------------------------------------------------------
 
@@ -119,17 +134,15 @@ CREATE TABLE `profile` (
 --
 
 INSERT INTO `profile` (`userId`, `username`, `displayName`, `email`, `password`) VALUES
-(101, '@test', 'tester', 'test@gmail.com', 'test'),
-(102, '@gorlockthebambino', 'Bambino', '', '99999'),
-(103, '@shampoo', 'John Shamos', '', '1231265434354'),
-(104, '@thebestemployee', 'Mission Control', 'thebestemployee@drg.com', 'rockandstone'),
-(105, '@trendieteen', 'Peter', '', 'fsdhtyjhg'),
-(107, '@wanderingmonk', 'Mikudrin', '', 'dlfskdm ejwjeiw'),
-(108, '@thebraveknight', 'Lil Gator', '', 'ncxbvjsdhfahi'),
-(109, '@judgementkazzy', 'Uncle Kaz', '', 'tigerdrop'),
-(110, '@thechosenundead', 'Local Knight', '', 'eeeehhhhhhhhhhhh'),
-(111, '@dungeondwelver', 'Senshi', '', 'sddjvkuygsfjdsbfjkeysgfd'),
-(124, '@q', 'q', 'q@gmail.com', '$2b$10$cMmuLv8H8oefiz5OP.OoC.x546TR18YEk11Av3uN1LKBJj9ZkU5Ji');
+(102, '@gorlockthebambino', 'Bambino', 'gorlock@gmail.com', '$2a$12$uM/eTbCWowai.Gw5C0ksaulVZfL.L188p2Vo.4cLjTd/iURp7XUZ.'),
+(103, '@shampoo', 'John Shamos', 'shamos@yahoo.com', '$2a$12$PMXil1Ez/lP2cqKNhiwnf.OCDkSJYOl3FywvFS5jajJLLM2nJdQSO'),
+(104, '@thebestemployee', 'Mission Control', 'thebestemployee@drg.com', '$2a$12$y2HixZR6HAag2ACHQCXyBexgN8JgHSETZalkf0fP27hF9zOwENdtW'),
+(105, '@trendieteen', 'Peter', 'pete@yahoo.com', '$2a$12$y2HixZR6HAag2ACHQCXyBexgN8JgHSETZalkf0fP27hF9zOwENdtW'),
+(107, '@wanderingmonk', 'Mikudrin', 'Mikudrin@bg3.com', '$2a$12$RnWMw.vTFUIlz8k3ohXdceb/ES82xnVlzRzlOQxaYWaH7DISKyqiq'),
+(108, '@thebraveknight', 'Lil Gator', 'lil@gmail.com', '$2a$12$oZ3iZgg17bickyx9UfIMr.EA0wOO8ViecU1IsqIT.3f0iSYWLW2d6'),
+(109, '@judgementkazzy', 'Uncle Kaz', 'kazzy@yahoo.com', '$2a$12$1kesy6cTkZxyBXRdMnp8xen9s4UH12wiYpI43NaZIFtFzF26ONj5u'),
+(110, '@thechosenundead', 'Local Knight', 'dsouls@gmail.com', '$2a$12$FAQ007so6HRRMMckyj5WuuvGfv9wxVPaouoklTuQUZ5DdTQ/5gKuK'),
+(111, '@dungeondwelver', 'Senshi', 'dunmesh@gmail.com', '$2a$12$qDPp1ITeEbYfVWD8pLj42uB3o5OTqmN2rfbk6SeNvIv9ioZ6/06iu');
 
 -- --------------------------------------------------------
 
@@ -155,15 +168,14 @@ CREATE TABLE `tweets` (
 --
 
 INSERT INTO `tweets` (`twtId`, `userId`, `tweet`, `image`, `timestamp`, `likes`, `retweets`, `qtweets`, `views`, `bookmarks`) VALUES
-(201, 103, 'AAARGH THEY JUST HUNTED MY FAMILY', 'https://i.imgur.com/8iFdqrC.jpeg', '2024-06-29 00:00:00', 100, 50, 25, 1999, 4),
-(202, 104, 'Can\'t believe the last batch of new recruits fell into a deep pit', NULL, '2024-06-01 00:00:00', 32, 5, 1, 90, 0),
-(203, 105, 'They got Jacob!', 'https://i.imgur.com/Lao46Bc.png', '2024-05-21 00:00:00', 50000, 23300, 5453, 5663422, 12938),
-(204, 107, 'I look sooo good 💅💅💅', 'https://i.imgur.com/2fphDuZ.png', '2024-04-30 00:00:00', 375, 123, 54, 6432, 3),
-(205, 108, 'Took me an hour to climb up here', 'https://i.imgur.com/g6svT2d.png', '2024-04-17 00:00:00', 2, 1, 0, 5, 1),
+(201, 103, 'AAARGH THEY JUST HUNTED MY FAMILY', 'https://i.imgur.com/8iFdqrC.jpeg', '2024-06-29 00:00:00', 102, 75, 25, 1999, 23),
+(202, 104, 'Can\'t believe the last batch of new recruits fell into a deep pit', NULL, '2024-06-01 00:00:00', 33, 8, 1, 90, 1),
+(203, 105, 'They got Jacob!', 'https://i.imgur.com/Lao46Bc.png', '2024-05-21 00:00:00', 50001, 23300, 5453, 566399, 12939),
+(204, 107, 'I look sooo good 💅💅💅', 'https://i.imgur.com/2fphDuZ.png', '2024-04-30 00:00:00', 376, 124, 54, 6432, 5),
+(205, 108, 'Took me an hour to climb up here', 'https://i.imgur.com/g6svT2d.png', '2024-04-17 00:00:00', 2, 2, 0, 5, 1),
 (206, 109, 'What have I run into this time...', 'https://i.imgur.com/S1MzYm4.png', '2024-04-09 00:00:00', 45, 3, 0, 300, 19),
 (207, 110, '...', NULL, '2024-02-21 00:00:00', 3216, 453, 231, 67329, 324),
-(208, 111, 'Cooked a good bunch of treasure bugs', 'https://i.imgur.com/B4sKzKk.jpeg', '2024-02-01 00:00:00', 5, 3, 1, 12, 2),
-(209, 107, 'test tweet', NULL, '2024-07-02 00:00:00', 0, 0, 0, 0, 0);
+(208, 111, 'Cooked a good bunch of treasure bugs', 'https://i.imgur.com/B4sKzKk.jpeg', '2024-02-01 00:00:00', 6, 4, 1, 12, 4);
 
 --
 -- Indexes for dumped tables
@@ -173,7 +185,7 @@ INSERT INTO `tweets` (`twtId`, `userId`, `tweet`, `image`, `timestamp`, `likes`,
 -- Indexes for table `comments`
 --
 ALTER TABLE `comments`
-  ADD PRIMARY KEY (`comment_id`),
+  ADD PRIMARY KEY (`commentId`),
   ADD KEY `twtId` (`twtId`);
 
 --
@@ -221,37 +233,37 @@ ALTER TABLE `tweets`
 -- AUTO_INCREMENT for table `comments`
 --
 ALTER TABLE `comments`
-  MODIFY `comment_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=316;
+  MODIFY `commentId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=316;
 
 --
 -- AUTO_INCREMENT for table `isbookmarked`
 --
 ALTER TABLE `isbookmarked`
-  MODIFY `bookmark_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `bookmark_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `isliked`
 --
 ALTER TABLE `isliked`
-  MODIFY `like_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `like_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
 
 --
 -- AUTO_INCREMENT for table `isretweeted`
 --
 ALTER TABLE `isretweeted`
-  MODIFY `retweet_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `retweet_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=99;
 
 --
 -- AUTO_INCREMENT for table `profile`
 --
 ALTER TABLE `profile`
-  MODIFY `userId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=125;
+  MODIFY `userId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
 
 --
 -- AUTO_INCREMENT for table `tweets`
 --
 ALTER TABLE `tweets`
-  MODIFY `twtId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=211;
+  MODIFY `twtId` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=231;
 
 --
 -- Constraints for dumped tables
