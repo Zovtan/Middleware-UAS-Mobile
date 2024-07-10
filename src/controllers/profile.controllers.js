@@ -11,12 +11,21 @@ const login = async (req, res) => {
     let userQuery = "";
     let queryParam = "";
 
+    // Cek apak identifier ada '@'
     if (identifier.includes('@')) {
-      // Jika input email
-      userQuery = "email = LOWER(?)";
-      queryParam = identifier.trim().toLowerCase();
+      // Cek apakah itu email
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier.trim());
+      if (isEmail) {
+        userQuery = "email = LOWER(?)";
+        queryParam = identifier.trim().toLowerCase();
+      } else {
+        // kalo ada '@' tapi bukan email, perlakukan kayak username
+        const trimmedUsername = identifier.trim().toLowerCase();
+        userQuery = "username = LOWER(?)";
+        queryParam = trimmedUsername.startsWith("@") ? trimmedUsername : `@${trimmedUsername}`;
+      }
     } else {
-      // jika input username
+      // kalo gk ada '@' itu username
       const trimmedUsername = identifier.trim().toLowerCase();
       userQuery = "username = LOWER(?)";
       queryParam = trimmedUsername.startsWith("@") ? trimmedUsername : `@${trimmedUsername}`;
@@ -28,7 +37,7 @@ const login = async (req, res) => {
     );
 
     if (data.length === 0) {
-      return res.status(404).json({ message: `${identifier.includes('@') ? "Email" : "Username"} not found` });
+      return res.status(404).json({ message: `${identifier.includes('@') && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier.trim()) ? "Email" : "Username"} not found` });
     }
 
     const user = data[0];
@@ -43,6 +52,7 @@ const login = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 
 //http://localhost:3031/profile/register
