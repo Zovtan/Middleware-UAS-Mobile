@@ -1,5 +1,4 @@
 const db = require("../database/database.connection");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 //http://localhost:3031/profile/login
